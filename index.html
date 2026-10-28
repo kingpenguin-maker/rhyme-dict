@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>5학년 랩 교실: AI 라임 사전</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#fff8ee;--card:#ffffff;--ink:#3b3350;--sub:#7a7190;--line:#3b3350;
+  --pink:#ffd9e6;--mint:#d4f3e4;--sky:#d6e8ff;--lemon:#fff3b8;--lav:#e6dcff;
+  --sel:#ffb4cf;--err:#d6365f;--errbg:#ffe3ea;--shadow:#3b3350;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1f1b2e;--card:#2b2640;--ink:#f3eefc;--sub:#b5acd0;--line:#cfc4ee;
+  --pink:#5a3447;--mint:#2f4d44;--sky:#2f4160;--lemon:#575029;--lav:#44396b;
+  --sel:#c2588a;--err:#ff8fa8;--errbg:#4a2433;--shadow:#0f0c1a;color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#1f1b2e;--card:#2b2640;--ink:#f3eefc;--sub:#b5acd0;--line:#cfc4ee;
+  --pink:#5a3447;--mint:#2f4d44;--sky:#2f4160;--lemon:#575029;--lav:#44396b;
+  --sel:#c2588a;--err:#ff8fa8;--errbg:#4a2433;--shadow:#0f0c1a;color-scheme:dark;}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:18px;line-height:1.5}
+h1,h2,button,.chip{font-family:"Jua","Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-weight:400}
+main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:clamp(26px,6vw,38px);text-align:center;margin:8px 0 20px;background:var(--lemon);border:3px solid var(--line);border-radius:22px;padding:14px 10px;box-shadow:5px 5px 0 var(--shadow)}
+.card{background:var(--card);border:3px solid var(--line);border-radius:22px;padding:16px;margin-bottom:18px;box-shadow:5px 5px 0 var(--shadow)}
+.card h2{font-size:22px;margin:0 0 12px}
+.badge{display:inline-block;background:var(--c,var(--pink));border:2px solid var(--line);border-radius:999px;padding:2px 12px;margin-right:8px;font-size:18px}
+.opts{display:grid;gap:10px;grid-template-columns:repeat(2,1fr)}
+.opts.one{grid-template-columns:1fr}
+.opt{font-size:19px;color:var(--ink);background:var(--c,var(--pink));border:3px solid var(--line);border-radius:16px;padding:14px 10px;cursor:pointer;min-height:56px;line-height:1.3;text-align:center}
+.opt small{display:block;font-family:"Gowun Dodum",sans-serif;font-size:15px;color:var(--sub);margin-top:2px}
+.opt[aria-pressed="true"]{background:var(--sel);transform:translate(3px,3px);box-shadow:inset 0 0 0 3px var(--card)}
+.opt[aria-pressed="true"]::before{content:"✔ "}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px solid #6aa3ff;outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+input[type=text],textarea{width:100%;font:inherit;font-size:22px;color:var(--ink);background:var(--bg);border:3px solid var(--line);border-radius:14px;padding:12px 14px}
+input[type=text]{flex:1 1 200px;width:auto}
+textarea{font-size:19px;resize:vertical;min-height:130px}
+.go,.copy{font-size:21px;color:var(--ink);background:var(--mint);border:3px solid var(--line);border-radius:16px;padding:12px 20px;cursor:pointer;box-shadow:4px 4px 0 var(--shadow)}
+.go:active,.copy:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--shadow)}
+.copy{background:var(--sky);margin-top:10px}
+.count{color:var(--sub);font-size:15px;margin-top:6px}
+.msg{display:none;margin-top:10px;background:var(--errbg);color:var(--err);border:2px solid var(--err);border-radius:12px;padding:8px 12px;font-weight:700}
+.msg.show{display:block}
+.msg.ok{background:var(--mint);color:var(--ink);border-color:var(--line)}
+#result{display:none}
+#result.show{display:block}
+.chips{display:grid;gap:10px;grid-template-columns:repeat(2,1fr)}
+.chip{font-size:24px;color:var(--ink);background:var(--sky);border:3px solid var(--line);border-radius:16px;padding:16px 8px;cursor:pointer;text-align:center}
+.chip[aria-pressed="true"]{background:var(--lemon);box-shadow:inset 0 0 0 3px var(--card)}
+.chip[aria-pressed="true"]::after{content:" ⭐"}
+.note{color:var(--sub);font-size:15px;margin:10px 0 0}
+.hint{background:var(--lav);border:2px dashed var(--line);border-radius:14px;padding:12px 14px}
+.slot{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0;font-size:19px}
+.slot .no{font-family:"Jua",sans-serif;white-space:nowrap}
+.slot .ph{background:var(--card);border:2px dashed var(--line);border-radius:10px;padding:4px 12px;color:var(--sub)}
+.slot .plus{font-family:"Jua",sans-serif}
+.slot .wd{background:var(--lemon);border:2px solid var(--line);border-radius:10px;padding:4px 12px;font-family:"Jua",sans-serif;font-size:21px}
+.ex{margin-top:12px;padding-top:10px;border-top:2px dotted var(--line)}
+.ex .ttl{font-family:"Jua",sans-serif;font-size:17px;color:var(--sub)}
+.ex p{margin:4px 0;font-size:19px}
+@media (max-width:420px){.opts{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<h1>🎤 5학년 랩 교실: AI 라임 사전</h1>
+
+<section class="card" aria-labelledby="s1">
+  <h2 id="s1"><span class="badge" style="--c:var(--pink)">Step 1</span>오늘 내 랩 주제 선택</h2>
+  <div class="opts" id="topics">
+    <button class="opt" data-v="급식" style="--c:var(--pink)" aria-pressed="false">🍱 급식 &amp; 먹거리</button>
+    <button class="opt" data-v="쉬는시간" style="--c:var(--mint)" aria-pressed="false">🎒 쉬는 시간 &amp; 하교</button>
+    <button class="opt" data-v="체육" style="--c:var(--sky)" aria-pressed="false">⚽ 체육 &amp; 놀이</button>
+    <button class="opt" data-v="자유" style="--c:var(--lemon)" aria-pressed="false">🌈 자유 주제</button>
+  </div>
+</section>
+
+<section class="card" aria-labelledby="s2">
+  <h2 id="s2"><span class="badge" style="--c:var(--mint)">Step 2</span>나만의 라임 규칙 선택</h2>
+  <div class="opts one" id="types">
+    <button class="opt" data-v="A" style="--c:var(--lav)" aria-pressed="false">A타입: 말끝 어미 맞추기<small>예: ~했지, ~하고</small></button>
+    <button class="opt" data-v="B" style="--c:var(--lemon)" aria-pressed="false">B타입: 끝 단어/명사 맞추기<small>예: 급식-소식</small></button>
+  </div>
+</section>
+
+<section class="card" aria-labelledby="s3">
+  <h2 id="s3"><span class="badge" style="--c:var(--sky)">Step 3</span>내가 고른 핵심 단어 1개 입력</h2>
+  <div class="row">
+    <input type="text" id="word" placeholder="예) 급식, 놀았지, 학교" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="핵심 단어 1개">
+    <button class="go" id="find">✨ 라임 단어 찾기</button>
+  </div>
+  <div class="count"><span id="cnt">0</span> / 6자</div>
+  <div class="msg" id="err" role="alert"></div>
+</section>
+
+<div id="result">
+  <section class="card" aria-labelledby="r1">
+    <h2 id="r1">① 추천 라임 단어 카드</h2>
+    <div class="chips" id="chips"></div>
+    <p class="note">마음에 드는 카드를 누르면 ⭐ 표시가 돼요. 종이 활동지에 적어 보세요!</p>
+    <div class="msg" id="note2"></div>
+  </section>
+
+  <section class="card" aria-labelledby="r2">
+    <h2 id="r2">② 힌트 가사 예시</h2>
+    <div class="hint" id="hint"></div>
+    <p class="note">점선 칸에는 내 이야기를 넣고, 노란 칸의 단어로 문장을 끝내 보세요!</p>
+  </section>
+
+  <section class="card" aria-labelledby="r3">
+    <h2 id="r3">③ 패들렛 가사 임시 메모장</h2>
+    <textarea id="memo" maxlength="200" placeholder="활동지에 완성한 4마디 가사를 여기에 적어요."></textarea>
+    <button class="copy" id="copy">📋 패들렛용 복사</button>
+    <div class="msg" id="cmsg" role="status"></div>
+  </section>
+</div>
+</main>
+
+<script>
+(function(){
+var topic="",type="";
+var $=function(id){return document.getElementById(id)};
+
+/* ===== 주제별 단어(B타입 라임 후보) ===== */
+var POOL={
+ "급식":"급식 소식 반찬 식판 젓가락 김치 국물 간식 밥 맛집 디저트 후식 우유 돈가스 치킨 짜장면 떡볶이 라면 과일 볶음밥 불고기 만두 피자 주스 파스타 계란 식당 점심 배식 영양사 입맛 숟가락 비빔밥",
+ "쉬는시간":"쉬는시간 하교 학교 친구 가방 신발 교실 복도 매점 종소리 책상 학원 집 숙제 놀이터 버스 정문 인사 웃음 수다 우정 약속 실내화 필통 칠판 방학 하굣길 문방구",
+ "체육":"체육 축구 피구 줄넘기 달리기 공 농구 놀이 운동 승리 응원 땀 호루라기 체육관 술래 발야구 배드민턴 철봉 훌라후프 박수 환호 힘 점프 도전 대결 운동장",
+ "자유":"우리 하늘 바다 노래 미래 꿈 희망 사랑 행복 기쁨 박자 리듬 음악 무대 마이크 랩 사진 여름 겨울 별 구름 무지개 소리 마음 세상 용기 햇살"
+};
+
+/* ===== A타입: 어미별 동사/형용사 사전 (p=과거형, n=현재형) ===== */
+var ENDS={
+ "지":{p:"먹었지 놀았지 웃었지 뛰었지 갔지 왔지 했지 봤지 신났지 달렸지 불렀지 좋았지",
+       n:"맛있지 신나지 재밌지 좋지 웃기지 달리지 멋지지 하지"},
+ "고":{p:"먹었고 놀았고 웃었고 뛰었고 갔고 왔고 했고 봤고 달렸고",
+       n:"먹고 놀고 웃고 뛰고 가고 하고 보고 달리고 외치고 모이고"},
+ "네":{p:"먹었네 놀았네 웃었네 뛰었네 갔네 왔네 했네 달렸네",
+       n:"맛있네 신나네 좋네 즐겁네 웃기네 재밌네 달리네 최고네"},
+ "다":{p:"먹었다 놀았다 웃었다 뛰었다 갔다 왔다 했다 달렸다",
+       n:"신난다 달린다 좋다 먹는다 논다 웃는다 뛴다 간다 춤춘다"},
+ "요":{p:"놀았어요 먹었어요 웃었어요 뛰었어요 갔어요 했어요 왔어요 달렸어요",
+       n:"해요 놀아요 먹어요 좋아요 신나요 웃어요 뛰어요 가요"},
+ "자":{n:"가자 놀자 먹자 뛰자 하자 웃자 달리자 외치자"},
+ "든":{p:"먹었거든 놀았거든 웃었거든 뛰었거든 갔거든 했거든",
+       n:"맛있거든 신나거든 좋거든 웃기거든 재밌거든 최고거든"},
+ "어":{n:"먹어 놀아 웃어 뛰어 달려 가봐 해봐 외쳐 불러 와봐"},
+ "게":{n:"맛있게 신나게 즐겁게 힘차게 크게 멋지게 재밌게 웃게"},
+ "는":{n:"신나는 달리는 먹는 웃는 뛰는 노는 맛있는 재밌는 부르는"},
+ "야":{n:"할 거야 갈 거야 놀 거야 먹을 거야 웃을 거야 뛸 거야 최고야"}
+};
+var ENDLABEL={"어":"~어/아","는":"~는"};
+
+/* ===== ② 힌트 가사 예시 (자연스러운 1줄 예시 2개씩) ===== */
+var PRE={
+ "A":{
+  "급식":["점심시간 줄 서서 기다렸지","식판 가득 담아서 맛있게 먹었지"],
+  "쉬는시간":["종소리 울리면 달려갔지","친구랑 복도에서 신나게 놀았지"],
+  "체육":["운동장에서 힘껏 달렸지","땀 흘리며 다 같이 웃었지"],
+  "자유":["오늘 기분 좋아서 노래했지","친구랑 손잡고 함께 웃었지"]},
+ "B":{
+  "급식":["배고픈 우리가 기다린 급식","친구와 나눠 먹는 간식"],
+  "쉬는시간":["아침마다 걸어가는 학교","친구와 웃으며 걷는 하교"],
+  "체육":["점프 점프 신나게 줄넘기","친구와 힘 모아 줄다리기"],
+  "자유":["친구와 함께 부르는 노래","크게 외쳐 보는 우리의 미래"]}
+};
+var HOLD={
+ "A":["내가 하고 싶은 이야기…","이어서 하고 싶은 이야기…"],
+ "B":["첫 번째 마디 이야기…","두 번째 마디 이야기…"]
+};
+
+/* ===== 금지어 필터 ===== */
+var BAD=[
+ "시발","씨발","병신","지랄","새끼","좆","섹스","야동","죽어","꺼져","미친","ㅅㅂ","ㅂㅅ","쓰레기","바보","멍청","꼴통","엿먹",
+ "존나","ㅈㄴ","느금","느금마","개새","애자","담배","술","지릴",
+ "L을 가져가","l을 가져가","L을 가저가","l을 가저가","엘을 가져가","엘을 가저가","앨을 가져가","앨을 가저가",
+ "L을가저가","l을가저가","L을가져가","l을가져가",
+ "공듀","공쥬",
+ "한별공듀","선혁공듀","원율공듀","주하공듀","시우공듀","준영공듀","채훈공듀",
+ "한별공쥬","선혁공쥬","원율공쥬","주하공쥬","시우공쥬","준영공쥬","채훈공쥬",
+ "한별공주","선혁공주","원율공주","주하공주","시우공주","준영공주","채훈공주"
+];
+var SAFE=["술래"]; /* ‘술’이 들어가지만 놀이 이름이라 허용 */
+function norm(s){return s.toLowerCase().replace(/\s+/g,"")}
+var BADN=[];
+BAD.forEach(function(b){var n=norm(b);if(BADN.indexOf(n)<0)BADN.push(n)});
+function bad(s){
+  var n=norm(s);
+  SAFE.forEach(function(x){n=n.split(x).join("")});
+  for(var i=0;i<BADN.length;i++){if(n.indexOf(BADN[i])>-1)return true}
+  return false;
+}
+
+/* ===== 공통 도구 ===== */
+function parts(ch){var c=ch.charCodeAt(0)-0xAC00;if(c<0||c>11171)return null;return{jung:Math.floor((c%588)/28),jong:c%28}}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function show(el,text,ok){el.textContent=text;el.className="msg show"+(ok?" ok":"")}
+function hide(el){el.className="msg"}
+
+function pick(group,btn){
+  document.querySelectorAll("#"+group+" .opt").forEach(function(b){b.setAttribute("aria-pressed","false")});
+  btn.setAttribute("aria-pressed","true");
+  if(group==="topics")topic=btn.dataset.v;else type=btn.dataset.v;
+  hide($("err"));
+}
+document.querySelectorAll("#topics .opt").forEach(function(b){b.addEventListener("click",function(){pick("topics",b)})});
+document.querySelectorAll("#types .opt").forEach(function(b){b.addEventListener("click",function(){pick("types",b)})});
+
+$("word").addEventListener("input",function(){$("cnt").textContent=this.value.trim().length;hide($("err"))});
+$("word").addEventListener("keydown",function(e){if(e.key==="Enter")find()});
+$("find").addEventListener("click",find);
+
+/* ===== B타입: 끝 글자/모음이 같은 명사 찾기 ===== */
+function rhymesB(w){
+  var last=w.charAt(w.length-1),lp=parts(last),seen={},cand=[],all=[];
+  Object.keys(POOL).forEach(function(k){POOL[k].split(" ").forEach(function(x){all.push({w:x,t:k})})});
+  all.forEach(function(o){
+    if(seen[o.w]||o.w===w)return;seen[o.w]=1;
+    var oc=o.w.charAt(o.w.length-1),op=parts(oc),s=0;
+    if(oc===last)s=3;
+    else if(lp&&op&&op.jung===lp.jung&&op.jong===lp.jong)s=2;
+    else if(lp&&op&&op.jung===lp.jung)s=1;
+    if(o.t===topic)s+=0.5;
+    cand.push({w:o.w,s:s,r:Math.random()});
+  });
+  cand.sort(function(a,b){return b.s-a.s||a.r-b.r});
+  var top=cand.filter(function(c){return c.s>=1}).slice(0,10);
+  var res=shuffle(top.map(function(c){return c.w})).slice(0,4);
+  if(res.length<4){
+    var fill=shuffle(POOL[topic].split(" ").filter(function(x){return x!==w&&res.indexOf(x)<0}));
+    res=res.concat(fill).slice(0,4);
+  }
+  return res;
+}
+
+/* ===== A타입: 어미 추출 → 같은 어미 + 같은 시제 + 비슷한 모음 순으로 추천 ===== */
+function endKey(w){
+  var last=w.charAt(w.length-1);
+  if(ENDS[last])return last;
+  if("어아여해봐줘워와려쳐러".indexOf(last)>-1)return "어";
+  return null;
+}
+function isPast(w){
+  /* 마지막 글자 앞 최대 2글자 중 받침 ㅆ(았/었/했/갔…)이 있으면 과거형 */
+  for(var i=w.length-2;i>=Math.max(0,w.length-3);i--){
+    var p=parts(w.charAt(i));
+    if(p&&p.jong===20)return true;
+  }
+  return false;
+}
+function rhymesA(w){
+  var key=endKey(w),fb=!key;
+  if(fb)key="지";
+  var entry=ENDS[key],past=!fb&&isPast(w)&&!!entry.p;
+  var tense=past?"p":(entry.n?"n":"p");
+  var main=entry[tense].split(" ").filter(function(x){return x!==w});
+  var other=entry[tense==="p"?"n":"p"];
+  other=other?other.split(" ").filter(function(x){return x!==w}):[];
+  var prevc=w.length>1?parts(w.charAt(w.length-2)):null;
+  function rank(list){
+    return list.map(function(x){
+      var c=x.length>1?parts(x.charAt(x.length-2)):null,s=0;
+      if(prevc&&c){if(c.jung===prevc.jung)s+=2;if(c.jong===prevc.jong)s+=1}
+      return{w:x,s:s+Math.random()*0.9};
+    }).sort(function(a,b){return b.s-a.s}).map(function(o){return o.w});
+  }
+  var words=rank(main).slice(0,4);
+  if(words.length<4)words=words.concat(rank(other)).slice(0,4);
+  return{words:words,key:key,past:past,fallback:fb};
+}
+
+/* ===== ② 힌트 만들기 ===== */
+function addSlot(box,no,hold,word){
+  var d=document.createElement("div");d.className="slot";
+  var a=document.createElement("span");a.className="no";a.textContent=no+"줄 ▶";
+  var b=document.createElement("span");b.className="ph";b.textContent="("+hold+")";
+  var c=document.createElement("span");c.className="plus";c.textContent="+";
+  var e=document.createElement("span");e.className="wd";e.textContent="["+word+"]";
+  d.appendChild(a);d.appendChild(b);d.appendChild(c);d.appendChild(e);
+  box.appendChild(d);
+}
+function buildHint(w,rec){
+  var box=$("hint");box.innerHTML="";
+  var h=HOLD[type];
+  addSlot(box,1,h[0],w);
+  addSlot(box,2,h[1],rec);
+  var ex=document.createElement("div");ex.className="ex";
+  var t=document.createElement("div");t.className="ttl";t.textContent="👀 이런 느낌이에요 (예시)";
+  ex.appendChild(t);
+  PRE[type][topic].forEach(function(s,i){
+    var p=document.createElement("p");p.textContent=(i+1)+"줄 ▶ "+s;ex.appendChild(p);
+  });
+  box.appendChild(ex);
+}
+
+/* ===== 메인: 라임 단어 찾기 ===== */
+function find(){
+  var err=$("err"),w=$("word").value.trim();
+  hide($("note2"));
+  if(!topic){show(err,"Step 1에서 랩 주제를 먼저 골라 주세요!");return}
+  if(!type){show(err,"Step 2에서 라임 규칙을 먼저 골라 주세요!");return}
+  if(!w){show(err,"핵심 단어를 입력해 주세요!");return}
+  if(bad(w)){show(err,"친구들과 함께 쓰는 수업이에요. 예쁜 말로 다시 입력해 주세요!");return}
+  if(/\s/.test(w)||w.length>6){show(err,"단어 1개만 입력해 주세요!");return}
+  if(!/^[가-힣]+$/.test(w)){show(err,"한글 단어 1개만 입력할 수 있어요!");return}
+  hide(err);
+  var words,info="",ok=true;
+  if(type==="A"){
+    var r=rhymesA(w);words=r.words;
+    if(r.fallback){
+      info="A타입은 ‘놀았지’처럼 말끝 단어를 넣으면 더 잘 찾아요. 지금은 기본 어미 ‘~지’를 보여 드려요!";
+    }else{
+      info="말끝 ‘"+(ENDLABEL[r.key]||r.key)+"’"+(r.past?" (지난 일을 말하는 형태)":"")+"로 끝나는 말을 찾았어요!";
+    }
+  }else{
+    words=rhymesB(w);
+  }
+  var box=$("chips");box.innerHTML="";
+  words.forEach(function(x){
+    var b=document.createElement("button");b.className="chip";b.type="button";b.textContent=x;b.setAttribute("aria-pressed","false");
+    b.addEventListener("click",function(){b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")==="true"?"false":"true")});
+    box.appendChild(b);
+  });
+  if(info)show($("note2"),info,ok);
+  buildHint(w,words[0]);
+  $("result").className="show";
+  $("result").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* ===== 패들렛용 복사 ===== */
+function fallbackCopy(t){
+  var ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";
+  document.body.appendChild(ta);ta.select();var ok=false;
+  try{ok=document.execCommand("copy")}catch(e){}
+  document.body.removeChild(ta);return ok;
+}
+$("copy").addEventListener("click",function(){
+  var m=$("cmsg"),t=$("memo").value.trim();
+  if(!t){show(m,"복사할 가사가 없어요. 4마디 가사를 먼저 적어 주세요!");return}
+  if(bad(t)){show(m,"예쁜 말로 가사를 고쳐 쓴 다음 복사해 주세요!");return}
+  function done(){show(m,"복사 완료! 패들렛에 붙여넣기(Ctrl+V) 하세요 🎉",true)}
+  function fail(){show(m,"복사가 안 됐어요. 글자를 길게 눌러 직접 복사해 주세요.")}
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(t).then(done,function(){fallbackCopy(t)?done():fail()});
+  }else{fallbackCopy(t)?done():fail()}
+});
+})();
+</script>
+</body>
+</html>
